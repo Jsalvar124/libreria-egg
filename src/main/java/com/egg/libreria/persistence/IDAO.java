@@ -14,6 +14,6 @@ public interface IDAO<T, K> {
 
         void delete(K id);
 
-        void softDelete(K id) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException;
+        void softDelete(K id);
 
 }

@@ -25,26 +25,40 @@ public class LibroService {
 
         try{
             Autor autor = autorDAO.findById(idAutor);
+            if (autor == null) {
+                throw new IllegalArgumentException("El autor con ID " + idAutor + " no existe.");
+            }
             Editorial editorial = editorialDAO.findById(idEditorial);
-
-            Libro nuevoLibro = new Libro(
-                    isbn,
-                    titulo,
-                    anio,
-                    ejemplares,
-                    true, // valor por default
-                    autor, // Autor, no autorId
-                    editorial // Editorial no Editorial Id
-            );
-            // Crear el libro
-            libroDAO.save(nuevoLibro);
+            if (editorial == null) {
+                throw new IllegalArgumentException("La editorial con ID " + idEditorial + " no existe.");
+            }
+            Libro libro = libroDAO.findById(isbn);
+            if(libro != null && libro.getActivo()){
+                throw new IllegalArgumentException("El libro ya se encuentra registrado.");
+            }
+            if(libro != null){
+                System.out.println("Restaurando libro eliminado");
+                libro.setActivo(true);
+                libroDAO.update(libro);
+            } else {
+                Libro nuevoLibro = new Libro(
+                        isbn,
+                        titulo,
+                        anio,
+                        ejemplares,
+                        true, // valor por default
+                        autor, // Autor, no autorId
+                        editorial // Editorial no Editorial Id
+                );
+                // Crear el libro
+                libroDAO.save(nuevoLibro);
+            }
         } catch(Exception e){
-            throw new RuntimeException("Error al guardar el libro: " + e.getMessage(), e);
+            System.out.println("Error al guardar el libro: " + e.getMessage());
         }
-
     }
 
-    public Libro buscarPorId(Long isbn) throws Exception{
+    public Libro buscarPorIsbn(Long isbn) throws Exception{
         try{
             Libro libro = libroDAO.findById(isbn);
             if(libro== null || !libro.getActivo()){
@@ -55,7 +69,6 @@ public class LibroService {
             return libro;
         } catch(Exception e){
             throw new RuntimeException("Error buscar el libro con ISBN " + isbn + ": "  + e.getMessage(), e);
-
         }
     }
 

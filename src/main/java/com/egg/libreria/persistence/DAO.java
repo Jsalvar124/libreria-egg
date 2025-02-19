@@ -3,15 +3,13 @@ package com.egg.libreria.persistence;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
-
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
-public abstract class DAO<T, K> implements IDAO<T, K>{
+public abstract class DAO<T extends SoftDeletable, K> implements IDAO<T , K>{
     private final Class<T> entityClass;
-    private EntityManagerFactory emf;
+    private static EntityManagerFactory emf;
 
-    {
+    static {
         try {
             emf = Persistence.createEntityManagerFactory(System.getenv("PERSISTENCE_UNIT"));
         } catch (Exception e) {
@@ -23,6 +21,10 @@ public abstract class DAO<T, K> implements IDAO<T, K>{
 
     public DAO(Class<T> entityClass) {
         this.entityClass = entityClass;
+    }
+
+    public static EntityManagerFactory getEntityManagerFactory() {
+        return emf;
     }
 
     @Override
@@ -60,6 +62,7 @@ public abstract class DAO<T, K> implements IDAO<T, K>{
     public List<T> findAll() {
         EntityManager em = emf.createEntityManager();
         try {
+            System.out.println("Finding all for class: " + entityClass.getSimpleName());
             return em.createQuery("SELECT e FROM " + entityClass.getSimpleName() + " e", entityClass).getResultList();
         }catch (Exception e){
             throw e;
@@ -94,10 +97,11 @@ public abstract class DAO<T, K> implements IDAO<T, K>{
 
         try{
             T entityToRemove = em.find(entityClass, id);
-            em.getTransaction().begin();
-            if (entityToRemove != null) {
-                em.remove(entityToRemove);
+            if (entityToRemove == null || !entityToRemove.getActivo()) {
+                throw new IllegalArgumentException("Entity with id " + id + " not found.");
             }
+            em.getTransaction().begin();
+            em.remove(entityToRemove);
             System.out.println("Entity Removed!");
             em.getTransaction().commit();
         }catch (Exception e){
@@ -111,16 +115,17 @@ public abstract class DAO<T, K> implements IDAO<T, K>{
     }
 
     @Override
-    public void softDelete(K id) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+    public void softDelete(K id) {
         EntityManager em = emf.createEntityManager();
 
         try{
             em.getTransaction().begin();
             T entityToRemove = em.find(entityClass, id);
-            if (entityToRemove != null) {
-                entityToRemove.getClass().getMethod("setActivo", Boolean.class).invoke(entityToRemove, false);
-                em.merge(entityToRemove);
+            if (entityToRemove == null || !entityToRemove.getActivo()) {
+                throw new IllegalArgumentException("Entity with id " + id + " not found.");
             }
+            entityToRemove.setActivo(false); // esto me parece más claro, como obligo al tipo T a implementar la interfaz soft deletable, aseguro que el método exista.
+            em.merge(entityToRemove);
             System.out.println("Entity Softly Removed!");
             em.getTransaction().commit();
         }catch (Exception e ){
