@@ -1,22 +1,14 @@
 package com.egg.libreria.persistence;
 
 import com.egg.libreria.entity.Autor;
-import com.egg.libreria.entity.Libro;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.Persistence;
+import jakarta.persistence.criteria.CriteriaBuilder;
 
-public class AutorDAO {
-    private final EntityManagerFactory emf = Persistence.createEntityManagerFactory("LibreriaPU");
-    private final EntityManager em = emf.createEntityManager();
+import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 
-    public void guardar(Autor autor) throws Exception {
-        em.getTransaction().begin();
-        em.persist(autor);
-        em.getTransaction().commit();
-    }
+public class AutorDAO extends DAO<Autor, Integer> {
 
-    public Autor buscarPorId(int id) throws Exception {
-        return em.find(Autor.class, id);
+    public AutorDAO() {
+        super(Autor.class);
     }
 }

@@ -7,6 +7,9 @@ import com.egg.libreria.persistence.AutorDAO;
 import com.egg.libreria.persistence.EditorialDAO;
 import com.egg.libreria.persistence.LibroDAO;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class LibroService {
     LibroDAO libroDAO;
     AutorDAO autorDAO;
@@ -21,8 +24,8 @@ public class LibroService {
     public void guardarLibro(Long isbn, String titulo, Integer anio, Integer ejemplares, Integer idAutor, Integer idEditorial) throws Exception{
 
         try{
-            Autor autor = autorDAO.buscarPorId(idAutor);
-            Editorial editorial = editorialDAO.buscarPorId(idEditorial);
+            Autor autor = autorDAO.findById(idAutor);
+            Editorial editorial = editorialDAO.findById(idEditorial);
 
             Libro nuevoLibro = new Libro(
                     isbn,
@@ -34,20 +37,44 @@ public class LibroService {
                     editorial // Editorial no Editorial Id
             );
             // Crear el libro
-            libroDAO.guardarLibro(nuevoLibro);
+            libroDAO.save(nuevoLibro);
         } catch(Exception e){
             throw new RuntimeException("Error al guardar el libro: " + e.getMessage(), e);
         }
 
     }
 
-    public Libro buscarPorId(int id) throws Exception{
+    public Libro buscarPorId(Long isbn) throws Exception{
         try{
-            return libroDAO.buscarLibroPorIsbn(id);
+            Libro libro = libroDAO.findById(isbn);
+            if(libro== null || !libro.getActivo()){
+                System.out.println("Libro no encontrado con ISBN: " + isbn);
+                return null;
+            }
+            System.out.println("Libro encontrado con ISBN" + isbn);
+            return libro;
         } catch(Exception e){
-            throw new RuntimeException("Error buscar el libro con id " + id + ": "  + e.getMessage(), e);
+            throw new RuntimeException("Error buscar el libro con ISBN " + isbn + ": "  + e.getMessage(), e);
 
         }
+    }
 
+    public void eliminarLibroPorIsbn(Long isbn) throws Exception{
+        try{
+            libroDAO.softDelete(isbn);
+        }catch (Exception e){
+            throw e;
+        }
+    }
+
+    public List<Libro> listarLibros(){
+        List<Libro> libros = libroDAO.findAll();
+        List<Libro> activos = new ArrayList<>();
+        for (Libro libro:libros) {
+            if(libro.getActivo()){
+                activos.add(libro);
+            }
+        }
+        return activos;
     }
 }
