@@ -112,12 +112,15 @@ public class Main
             List<Libro> resultAutor2 =  libroService.buscarPorAutor("a");
             List<Libro> resultEditorial =  libroService.buscarPorEditorial("Planeta");
 
+
+
             System.out.println(resultTitulo);
             System.out.println(resultAutor);
             System.out.println(resultAutor2);
             System.out.println(resultEditorial);
 
         }catch (Exception e){
+            e.printStackTrace();
             e.getMessage();
         }
     }

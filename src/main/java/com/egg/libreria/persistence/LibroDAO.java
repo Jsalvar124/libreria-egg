@@ -15,7 +15,7 @@ public class LibroDAO extends DAO<Libro, Long> {
         super(Libro.class);
     }
 
-    public List<Libro> findByAttribute(String column, String value){
+    public List<Libro> findByAttribute(String column, String value) {
         EntityManager em = getEntityManagerFactory().createEntityManager();
 
         Set<String> allowedColumns = new HashSet<>(); //lista de valores permitidos para evitar inyección SQL.
@@ -26,12 +26,15 @@ public class LibroDAO extends DAO<Libro, Long> {
         if (!allowedColumns.contains(column)) {
             throw new IllegalArgumentException("Invalid column name: " + column);
         }
-        try{
+        try {
             String queryString = "SELECT a FROM Libro a WHERE LOWER(a." + column + ") LIKE :value";
 
             return em.createQuery(queryString, Libro.class)
-                    .setParameter("value","%"+value.toLowerCase() +"%")
+                    .setParameter("value", "%" + value.toLowerCase() + "%")
                     .getResultList();
+        } catch(IllegalArgumentException e){
+            e.printStackTrace();
+            return new ArrayList<>();
         }catch (NoResultException e) {
             System.out.println("No results found");
             return new ArrayList<>(); // Instead of throwing an exception, return empty array.
