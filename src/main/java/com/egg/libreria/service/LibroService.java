@@ -6,6 +6,7 @@ import com.egg.libreria.entity.Libro;
 import com.egg.libreria.persistence.AutorDAO;
 import com.egg.libreria.persistence.EditorialDAO;
 import com.egg.libreria.persistence.LibroDAO;
+import jakarta.persistence.NoResultException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,6 +73,52 @@ public class LibroService {
         }
     }
 
+    public List<Libro> buscarPorTitulo(String titulo) throws Exception{
+        try {
+            List<Libro> resultado = libroDAO.findByAttribute("titulo", titulo);
+            if(resultado==null || resultado.isEmpty()){
+                System.out.println("No se encontraron resultados para la busqueda "+ titulo);
+                return new ArrayList<>();
+            }
+            System.out.println("Se encontraron "+ resultado.size() +" para la busqueda "+ titulo);
+            return resultado;
+        } catch (Exception e){
+            throw new RuntimeException("Error buscar el libro con titulo " + titulo + ": "  + e.getMessage(), e);
+        }
+    }
+
+    public List<Libro> buscarPorAutor(String autor) throws Exception{
+        try {
+            List<Libro> resultado = libroDAO.findByAttribute("autor.nombre", autor);
+            if(resultado==null || resultado.isEmpty()){
+                System.out.println("No se encontraron resultados para la busqueda "+ autor);
+                return new ArrayList<>();
+            }
+             List<Libro> activos = filtrarActivos(resultado);
+
+            System.out.println("Se encontraron "+ activos.size() +" para la busqueda "+ autor);
+            return activos;
+        } catch (Exception e){
+            throw new RuntimeException("Error buscar el libro con autor " + autor + ": "  + e.getMessage(), e);
+        }
+    }
+
+    public List<Libro> buscarPorEditorial(String editorial) throws Exception{
+        try {
+            List<Libro> resultado = libroDAO.findByAttribute("editorial.nombre", editorial);
+            if(resultado==null || resultado.isEmpty()){
+                System.out.println("No se encontraron resultados para la busqueda "+ editorial);
+                return new ArrayList<>();
+            }
+            List<Libro> activos = filtrarActivos(resultado);
+
+            System.out.println("Se encontraron "+ activos.size() +" para la busqueda "+ editorial);
+            return activos;
+        } catch (Exception e){
+            throw new RuntimeException("Error buscar el libro con editorial " + editorial + ": "  + e.getMessage(), e);
+        }
+    }
+
     public void eliminarLibroPorIsbn(Long isbn) throws Exception{
         try{
             libroDAO.softDelete(isbn);
@@ -82,6 +129,10 @@ public class LibroService {
 
     public List<Libro> listarLibros(){
         List<Libro> libros = libroDAO.findAll();
+        return filtrarActivos(libros);
+    }
+
+    public List<Libro> filtrarActivos(List<Libro> libros){
         List<Libro> activos = new ArrayList<>();
         for (Libro libro:libros) {
             if(libro.getActivo()){

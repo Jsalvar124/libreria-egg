@@ -63,6 +63,14 @@ public class Main
 //                    2,     // Author ID (Haruki Murakami, replace with correct ID)
 //                    1      // Editorial ID (Same as previous books)
 //            );
+//            libroService.guardarLibro(
+//                    9780553293357L,  // ISBN (example, replace with actual if needed)
+//                    "Foundation",     // Title
+//                    1951,            // Year of publication
+//                    500,             // Number of copies
+//                    3,               // Author ID (Isaac Asimov)
+//                    2                // Editorial ID
+//            );
 
 //            System.out.println(libroService.listarLibros());
 
@@ -71,27 +79,43 @@ public class Main
 //            System.out.println(resultado);
 
             //soft delete
-//            libroService.eliminarLibroPorIsbn(9780241968567L);
+//            libroService.eliminarLibroPorIsbn(9780553293357L);
 
             //Soft Delete test
-//            Libro resultado2 = libroService.buscarPorIsbn(9780241968567L);
+            Libro resultado2 = libroService.buscarPorIsbn(9780241968567L);
 
             //Libros
 //            System.out.println(libroService.listarLibros());
 
 //            Autor gabo = autorDAO.findByName("Gabriel García Márquez");
 //            System.out.println(gabo);
-            AutorService autorService = new AutorService(autorDAO);
-            autorService.guardarAutor("Isaac Asimov"); //
+//            AutorService autorService = new AutorService(autorDAO);
+//            autorService.guardarAutor("Isaac Asimov");
 //            List<Autor> autores = autorDAO.findAll();
 //            for (Autor a:autores) {
 //                System.out.println(a);
 //            }
 
-            EditorialService editorialService = new EditorialService(editorialDAO);
-            editorialService.guardarEditorial("Oveja Negra");
+//            EditorialService editorialService = new EditorialService(editorialDAO);
+//            editorialService.guardarEditorial("Oveja Negra");
 
+//            libroService.guardarLibro(
+//                    9780553293357L,  // ISBN (example, replace with actual if needed)
+//                    "Foundation",     // Title
+//                    1951,            // Year of publication
+//                    500,             // Number of copies
+//                    3,               // Author ID (Isaac Asimov)
+//                    2                // Editorial ID
+//            );
+            List<Libro> resultTitulo =  libroService.buscarPorTitulo("años");
+            List<Libro> resultAutor =  libroService.buscarPorAutor("Gabriel");
+            List<Libro> resultAutor2 =  libroService.buscarPorAutor("a");
+            List<Libro> resultEditorial =  libroService.buscarPorEditorial("Planeta");
 
+            System.out.println(resultTitulo);
+            System.out.println(resultAutor);
+            System.out.println(resultAutor2);
+            System.out.println(resultEditorial);
 
         }catch (Exception e){
             e.getMessage();
